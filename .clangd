@@ -1,0 +1,11 @@
+---
+If:
+  PathMatch: .*\.h
+CompileFlags:
+  Add: [-xc, -std=c99]
+  Remove: [-xc++, -xobjective-c, -xobjective-c++]
+---
+If:
+  PathMatch: .*\.hpp
+CompileFlags:
+  Add: [-xc++, -std=c++17]
