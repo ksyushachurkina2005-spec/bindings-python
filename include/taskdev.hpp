@@ -1,9 +1,10 @@
 #pragma once
-
-extern "C" {
-
+#include <cstdarg>
+#include <cstdlib>
 #include <stdio.h>
 #include <sys/types.h>
+
+extern "C" {
 
 ////////// Text //////////
 // Trim string from trailing whitespace
@@ -111,9 +112,6 @@ bool taskdev_feedback_empty(void);
 // Note: if 'indent' < 0, output is formatted as a single line
 void taskdev_result_print_json(int indent);
 }
-
-#include <cstdarg>
-#include <cstdlib>
 
 namespace taskdev {
 

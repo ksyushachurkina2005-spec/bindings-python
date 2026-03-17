@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -Wpedantic -O2 -Iinclude -fPIC
 LDFLAGS = -shared
 
 # Installation directories (override with e.g., make install PREFIX=/usr)
-PREFIX ?= /usr/local
+PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
 INCLUDEDIR ?= $(PREFIX)/include
 
@@ -34,10 +34,10 @@ $(LIB): $(OBJ)
 tests: $(LIB) $(TEST_EXECS)
 
 $(TEST_C:.c=): %: %.c
-	$(CC) $< -Iinclude -Lbuild -ltaskdev -o $@
+	$(CC) $< -Iinclude -L$(LIBPATH) -ltaskdev -o $@
 
 $(TEST_CXX:.cpp=): %: %.cpp
-	$(CXX) $< -Iinclude -Lbuild -ltaskdev -o $@
+	$(CXX) $< -Iinclude -L$(LIBPATH) -ltaskdev -o $@
 
 run: tests
 	@echo "Running tests..."
