@@ -1,15 +1,19 @@
-from _taskdev import ffi, lib
+from ._ffi import ffi, lib
 
-class TastDevError(Exception):
-	"""Исключение для возникших ошибок"""
-	pass
+
+class TaskDevError(Exception):
+    """Исключение для возникших ошибок"""
+
+    pass
+
 
 class TaskDev:
-	"""Обертка для библиотечных функций"""
-	
-	""" Text functions """
-	@staticmethod
-	def str_trim(s):
+    """Обертка для библиотечных функций"""
+
+    """ Text functions """
+
+    @staticmethod
+    def str_trim(s):
         """Обрезает пробелы в конце строки"""
         if not s:
             return s
@@ -17,74 +21,71 @@ class TaskDev:
         lib.taskdev_str_trim(buf)
         return ffi.string(buf).decode()
 
-	@staticmethod
-    	def str_remove_whitespace(s):
+    @staticmethod
+    def str_remove_whitespace(s):
         """Удаляет все пробельные символы"""
         if not s:
             return s
         buf = ffi.new("char[]", s.encode())
         lib.taskdev_str_remove_all_whitespace(buf)
         return ffi.string(buf).decode()
-    
-    	@staticmethod
-    	def str_find_fuzzy(haystack, needle, max_diff):
-        """Нечеткий поиск подстроки"""
-        return bool(lib.taskdev_str_find_fuzzy(
-            haystack.encode(),
-            needle.encode(),
-            max_diff 
-	))
 
-	""" Command functions """
-	@staticmethod
-    	def cmd_check(command, expected_output):
+    @staticmethod
+    def str_find_fuzzy(haystack, needle, max_diff):
+        """Нечеткий поиск подстроки"""
+        return bool(
+            lib.taskdev_str_find_fuzzy(
+                haystack.encode(), needle.encode(), max_diff)
+        )
+
+    """ Command functions """
+
+    @staticmethod
+    def cmd_check(command, expected_output):
         """Выполняет команду и проверяет, содержится ли expected_output в выводе"""
-        return bool(lib.taskdev_cmd_check(
-            command.encode(),
-            expected_output.encode()
-        ))
-    
-    	@staticmethod
-    	def cmd_check_fuzzy(command, expected_output, max_diff):
+        return bool(lib.taskdev_cmd_check(command.encode(), expected_output.encode()))
+
+    @staticmethod
+    def cmd_check_fuzzy(command, expected_output, max_diff):
         """Выполняет команду и проверяет вывод нечетким поиском"""
-        return bool(lib.taskdev_cmd_check_fuzzy(
-            command.encode(),
-            expected_output.encode(),
-            max_diff
-        ))
-    
-    	@staticmethod
-    	def cmd_run(command):
+        return bool(
+            lib.taskdev_cmd_check_fuzzy(
+                command.encode(), expected_output.encode(), max_diff
+            )
+        )
+
+    @staticmethod
+    def cmd_run(command):
         """Выполняет команду без вывода"""
         if not command:
             return False
         return bool(lib.taskdev_cmd_run_str(command.encode()))
 
+    """  File  functions """
 
-	"""  File  functions """
-    	@staticmethod
-    	def file_exists(filename):
+    @staticmethod
+    def file_exists(filename):
         """Проверяет существование файла или директории"""
         if not filename:
             return False
         return bool(lib.taskdev_file_exists(filename.encode()))
-    
-    	@staticmethod
-    	def file_executable(filename):
+
+    @staticmethod
+    def file_executable(filename):
         """Проверяет, является ли файл исполняемым"""
         if not filename:
             return False
         return bool(lib.taskdev_file_executable(filename.encode()))
-    
-   	 @staticmethod
-    	def file_size(filename):
+
+    @staticmethod
+    def file_size(filename):
         """Возвращает размер файла в байтах"""
         if not filename:
             return -1
         return lib.taskdev_file_size(filename.encode())
-    
-    	@staticmethod
-    	def file_read(filename):
+
+    @staticmethod
+    def file_read(filename):
         """Читает весь файл, возвращает (содержимое, размер)"""
         if not filename:
             return None, None
@@ -96,107 +97,101 @@ class TaskDev:
         content = ffi.string(data, size).decode()
         ffi.C.free(data)
         return content, size
-    
-    	@staticmethod
-    	def file_check(filename, expected_content):
+
+    @staticmethod
+    def file_check(filename, expected_content):
         """Проверяет, содержится ли подстрока в файле"""
         if not filename or not expected_content:
             return False
-        return bool(lib.taskdev_file_check(
-            filename.encode(),
-            expected_content.encode()
-        ))
-    
-    	@staticmethod
-    	def file_check_exact(filename, expected_content):
+        return bool(
+            lib.taskdev_file_check(
+                filename.encode(), expected_content.encode())
+        )
+
+    @staticmethod
+    def file_check_exact(filename, expected_content):
         """Проверяет точное совпадение содержимого файла"""
         if not filename or not expected_content:
             return False
-        return bool(lib.taskdev_file_check_exact(
-            filename.encode(),
-            expected_content.encode()
-        ))
-    
-    	@staticmethod
-    	def file_compare(file1, file2):
+        return bool(
+            lib.taskdev_file_check_exact(
+                filename.encode(), expected_content.encode())
+        )
+
+    @staticmethod
+    def file_compare(file1, file2):
         """Сравнивает два файла"""
         if not file1 or not file2:
             return False
-        return bool(lib.taskdev_file_compare(
-            file1.encode(),
-            file2.encode()
-        ))
-    
-    	""" Device functions """
-    	@staticmethod
-    	def dev_partition_size(device):
+        return bool(lib.taskdev_file_compare(file1.encode(), file2.encode()))
+
+        """ Device functions """
+
+    @staticmethod
+    def dev_partition_size(device):
         """Возвращает размер раздела в килобайтах"""
         if not device:
             return -1
         return lib.taskdev_dev_partition_size(device.encode())
-    
-    	@staticmethod
-    	def dev_check_filesystem_type(device, expected_fs):
+
+    @staticmethod
+    def dev_check_filesystem_type(device, expected_fs):
         """Проверяет тип файловой системы устройства"""
-        return bool(lib.taskdev_dev_check_filesystem_type(
-            device.encode(),
-            expected_fs.encode()
-        ))
-    
-    	@staticmethod
-    	def dev_mounted(device, mount_point):
+        return bool(
+            lib.taskdev_dev_check_filesystem_type(
+                device.encode(), expected_fs.encode())
+        )
+
+    @staticmethod
+    def dev_mounted(device, mount_point):
         """Проверяет, примонтировано ли устройство"""
-        return bool(lib.taskdev_dev_mounted(
-            device.encode(),
-            mount_point.encode()
-        ))
-    
-    	@staticmethod
-    	def dev_swap_active(device):
+        return bool(lib.taskdev_dev_mounted(device.encode(), mount_point.encode()))
+
+    @staticmethod
+    def dev_swap_active(device):
         """Проверяет, активен ли swap на устройстве"""
         if not device:
             return False
         return bool(lib.taskdev_dev_swap_active(device.encode()))
-    
-    	@staticmethod
-    	def dev_check_fstab(device, mount_point, fs_type):
+
+    @staticmethod
+    def dev_check_fstab(device, mount_point, fs_type):
         """Проверяет наличие записи в /etc/fstab"""
         mp = mount_point.encode() if mount_point else ffi.NULL
-        return bool(lib.taskdev_dev_check_fstab(
-            device.encode(),
-            mp,
-            fs_type.encode()
-        ))
-    
-    	"""  Process Functions """
-    	@staticmethod
-    	def proc_find_pid(name):
+        return bool(lib.taskdev_dev_check_fstab(device.encode(), mp, fs_type.encode()))
+
+        """  Process Functions """
+
+    @staticmethod
+    def proc_find_pid(name):
         """Находит PID процесса по имени"""
         if not name:
             return -1
         return lib.taskdev_proc_find_pid(name.encode())
-    
-    	"""  Container Functions """
-    	@staticmethod
-    	def docker_container_running(container):
+
+        """  Container Functions """
+
+    @staticmethod
+    def docker_container_running(container):
         """Проверяет, запущен ли Docker контейнер"""
         if not container:
             return False
         return bool(lib.taskdev_docker_container_running(container.encode()))
-    
-    	"""  Environment Functions """
-    	@staticmethod
-    	def env_get_user():
+
+        """  Environment Functions """
+
+    @staticmethod
+    def env_get_user():
         """Возвращает имя текущего пользователя"""
         return ffi.string(lib.taskdev_env_get_user()).decode()
-    
-    	@staticmethod
-    	def env_get_home():
+
+    @staticmethod
+    def env_get_home():
         """Возвращает путь к домашней директории"""
         return ffi.string(lib.taskdev_env_get_home()).decode()
-    
-    	@staticmethod
-    	def env_build_home_path(rel):
+
+    @staticmethod
+    def env_build_home_path(rel):
         """Строит полный путь от домашней директории"""
         if not rel:
             return TaskDev.env_get_home()
@@ -204,9 +199,9 @@ class TaskDev:
         result = ffi.string(path).decode()
         ffi.C.free(path)
         return result
-    
-    	@staticmethod
-    	def env_get_str(name, default=None):
+
+    @staticmethod
+    def env_get_str(name, default=None):
         """Получает значение переменной окружения"""
         if not name:
             return default
@@ -215,106 +210,104 @@ class TaskDev:
         if value == ffi.NULL:
             return None
         return ffi.string(value).decode()
-    
-    	@staticmethod
-    	def env_set(name, value, overwrite=True):
+
+    @staticmethod
+    def env_set(name, value, overwrite=True):
         """Устанавливает переменную окружения"""
         if not name or not value:
             return False
-        return bool(lib.taskdev_env_set(
-            name.encode(),
-            value.encode(),
-            overwrite
-        ))
-    
-    	@staticmethod
-    	def env_unset(name):
+        return bool(lib.taskdev_env_set(name.encode(), value.encode(), overwrite))
+
+    @staticmethod
+    def env_unset(name):
         """Удаляет переменную окружения"""
         if not name:
             return False
         return bool(lib.taskdev_env_unset(name.encode()))
-    
-    	@staticmethod
-    	def env_backup(name):
+
+    @staticmethod
+    def env_backup(name):
         """Создает бэкап переменной окружения"""
         if not name:
             return False
         return bool(lib.taskdev_env_backup(name.encode()))
-    
-    	@staticmethod
-    	def env_restore(name):
+
+    @staticmethod
+    def env_restore(name):
         """Восстанавливает переменную окружения из бэкапа"""
         if not name:
             return False
         return bool(lib.taskdev_env_restore(name.encode()))
-    
-    	"""  Grade Functions """
-    	@staticmethod
-    	def grade_set(value):
+
+        """  Grade Functions """
+
+    @staticmethod
+    def grade_set(value):
         """Устанавливает оценку"""
         lib.taskdev_grade_set(value)
-    
-    	@staticmethod
-    	def grade_add(value):
+
+    @staticmethod
+    def grade_add(value):
         """Добавляет/вычитает баллы к текущей оценке"""
         lib.taskdev_grade_add(value)
-    
-    	@staticmethod
-    	def grade_get():
+
+    @staticmethod
+    def grade_get():
         """Возвращает текущую оценку"""
         return lib.taskdev_grade_get()
-    
-    	"""  Feedback functions """
-    	@staticmethod
-    	def feedback_add(message):
+
+        """  Feedback functions """
+
+    @staticmethod
+    def feedback_add(message):
         """Добавляет сообщение обратной связи"""
         if not message:
             return
         lib.taskdev_feedback_add_str(message.encode())
-    
-    	@staticmethod
-    	def feedback_add_formatted(format_str, *args):
+
+    @staticmethod
+    def feedback_add_formatted(format_str, *args):
         """Добавляет форматированное сообщение"""
         if not format_str:
             return
         message = format_str % args
         lib.taskdev_feedback_add_str(message.encode())
-    
-    	@staticmethod
-    	def feedback_clear():
+
+    @staticmethod
+    def feedback_clear():
         """Очищает все сообщения"""
         lib.taskdev_feedback_clear()
-    
-    	@staticmethod
-    	def feedback_set_at(index, message):
+
+    @staticmethod
+    def feedback_set_at(index, message):
         """Заменяет сообщение по индексу"""
         lib.taskdev_feedback_set_at_str(index, message.encode())
-    
-    	@staticmethod
-    	def feedback_get_at(index):
+
+    @staticmethod
+    def feedback_get_at(index):
         """Возвращает сообщение по индексу"""
         msg = lib.taskdev_feedback_get_at(index)
         if msg == ffi.NULL:
             return None
         return ffi.string(msg).decode()
-    
-    	@staticmethod
-    	def feedback_remove_at(index):
+
+    @staticmethod
+    def feedback_remove_at(index):
         """Удаляет сообщение по индексу"""
         lib.taskdev_feedback_remove_at(index)
-    
-    	@staticmethod
-    	def feedback_count():
+
+    @staticmethod
+    def feedback_count():
         """Возвращает количество сообщений"""
         return lib.taskdev_feedback_count()
-    
-    	@staticmethod
-    	def feedback_empty():
+
+    @staticmethod
+    def feedback_empty():
         """Проверяет, есть ли сообщения"""
         return bool(lib.taskdev_feedback_empty())
-    
-    	@staticmethod
-    	def get_all_feedback():
+
+    @staticmethod
+    def get_all_feedback():
         """Возвращает список всех сообщений"""
         result = []
         count = TaskDev.feedback_count()
@@ -323,10 +316,11 @@ class TaskDev:
             if msg:
                 result.append(msg)
         return result
-    
-    	"""  Output functions """
-    	@staticmethod
-    	def result_print_json(indent=2):
+
+        """  Output functions """
+
+    @staticmethod
+    def result_print_json(indent=2):
         """Выводит результат в JSON формате"""
         lib.taskdev_result_print_json(indent)
 
@@ -392,4 +386,3 @@ get_all_feedback = TaskDev.get_all_feedback
 
 """ Output functions """
 result_print_json = TaskDev.result_print_json
-
