@@ -1,6 +1,15 @@
 from cffi import FFI
 import os
 ffi.cdef("""
+    // Systems types
+    typedef int pid_t;
+    typedef unsigned int uid_t;
+    typedef unsigned int gid_t;
+    typedef long off_t;
+
+    // Standart types
+    typedef struct FILE FILE;
+
     // Text functions
     void taskdev_str_trim(char *str);
     void taskdev_str_remove_all_whitespace(char *str);
@@ -62,7 +71,12 @@ ffi.cdef("""
     void taskdev_result_print_json(int indent);
 """)
 
-ffi.dlopen("libtaskdev.so")
+try:
+    lib=ffi.dlopen("libtaskdev.so")
+    print ("The library is loaded")
+except  OSError:
+    print ("Error: the livrary not found")
+    sys.exit(1)
 
 if __name__ == "__main__":
     print ("The module has been compiled successfully")
